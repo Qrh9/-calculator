@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classic Casio Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Digital+7&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to right, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .calculator-container {
+            position: relative;
+            display: flex;
+            z-index: 2;
+        }
+
+        .calculator {
+            width: 350px;
+            border: 2px solid #4d5368;
+            border-radius: 1.5em;
+            background: #3a5872;
+            padding: 20px;
+            box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.7);
+            z-index: 3;
+        }
+
+        .display {
+            width: 90%;
+            height: 50px;
+            background: #222;
+            color: #0f0;
+            text-align: right;
+            padding: 10px;
+            font-size: 2rem;
+            border-radius: 0.5em;
+            margin: 0 auto 10px auto;
+            box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.5);
+            font-family: 'Digital 7', monospace;
+        }
+
+        .trig-buttons, .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .button {
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(145deg, #b8c1d1, #939ab4);
+            border: 2px solid #4d5368;
+            border-radius: 0.2em;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: #fff;
+            transition: background 0.3s, transform 0.1s;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4), inset -2px -2px 4px rgba(255, 255, 255, 0.1);
+        }
+
+        .button:active {
+            transform: translateY(4px);
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .button:hover {
+            background: #777;
+        }
+
+        .operator-button {
+            background: linear-gradient(145deg, #2d5061, #2b4753);
+            color: #fff;
+        }
+
+        .operator-button:hover {
+            background-color: #1a2f38;
+        }
+
+        .special-button {
+            background: linear-gradient(145deg, #e57b8c, #c86e78);
+            color: #fff;
+        }
+
+        .special-button:hover {
+            background-color: #a93226;
+        }
+
+        .memory-button {
+            background: linear-gradient(145deg, #ffcc66, #d4a04c);
+            color: #fff;
+        }
+
+        .memory-button:hover {
+            background-color: #c98e3a;
+        }
+
+        .equal-button {
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            color: #fff;
+            grid-column: span 2;
+            height: 100%;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.4), inset -2px -2px 4px rgba(255, 255, 255, 0.1);
+        }
+
+        .equal-button:hover {
+            background-color: #1e8449;
+        }
+
+        .zero {
+            grid-column: span 2;
+        }
+
+        .external-button {
+            position: absolute;
+            top: 50%;
+            right: -60px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(145deg, #000000, #333333);
+            border: 2px solid #4d5368;
+            border-radius: 0.2em;
+            cursor: pointer;
+            transition: transform 0.5s ease, width 0.5s ease, height 0.5s ease, right 0.5s ease, opacity 0.5s ease;
+            z-index: 4;
+            display: block;
+        }
+
+        .external-button:active {
+            transform: translateY(4px);
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .external-button.hidden {
+            display: none;
+        }
+
+        .formula-slide {
+            position: absolute;
+            top: 0;
+            right: -600px;
+            width: 300px;
+            height: 100%;
+            background: #222;
+            border: 2px solid #4d5368;
+            padding: 20px;
+            border-radius: 1em 0 0 1em;
+            box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.7);
+            color: #fff;
+            font-size: 1rem;
+            transition: right 0.5s ease, opacity 0.5s ease;
+            z-index: 6;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .formula-slide.active {
+            right: 0;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .apply-formula-button {
+            margin-top: 10px;
+            background: linear-gradient(145deg, #e57b8c, #c86e78);
+            border: 2px solid #4d5368;
+            color: #fff;
+            padding: 10px;
+            border-radius: 0.2em;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .apply-formula-button:hover {
+            background-color: #a93226;
+        }
+
+        .scroll-button {
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(145deg, #b8c1d1, #939ab4);
+            border: 2px solid #4d5368;
+            border-radius: 0.2em;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .scroll-button:hover {
+            background-color: #777;
+        }
+
+        .close-formula-button {
+            background: linear-gradient(145deg, #e57b8c, #c86e78);
+            border: 2px solid #4d5368;
+            color: #fff;
+            padding: 10px;
+            border-radius: 0.2em;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .close-formula-button:hover {
+            background-color: #a93226;
+        }
+
+        .close-formula-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e57b8c;
+            border: none;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 0.2em;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .close-formula-panel:hover {
+            background-color: #a93226;
+        }
+
+        h3 {
+            border-bottom: 1px solid #fff;
+            padding-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="calculator">
+            <div class="display" id="display">0</div>
+            <div class="trig-buttons">
+                <button class="button operator-button" onclick="calculateTrig('sin')">sin</button>
+                <button class="button operator-button" onclick="calculateTrig('cos')">cos</button>
+                <button class="button operator-button" onclick="calculateTrig('tan')">tan</button>
+                <button class="button operator-button" onclick="calculateTrig('log')">log</button>
+                <button class="button operator-button" onclick="calculateTrig('exp')">exp</button>
+
+                <button class="button operator-button" onclick="calculateTrig('asin')">sin<sup>-1</sup></button>
+                <button class="button operator-button" onclick="calculateTrig('acos')">cos<sup>-1</sup></button>
+                <button class="button operator-button" onclick="calculateTrig('atan')">tan<sup>-1</sup></button>
+                <button class="button operator-button" onclick="calculateTrig('cot')">cot</button>
+                <button class="button operator-button" onclick="calculateTrig('sqrt')">√</button>
+            </div>
+            <div class="buttons">
+                <button class="button special-button" onclick="clearDisplay()">AC</button>
+                <button class="button memory-button" onclick="memoryRecall()">MR</button>
+                <button class="button memory-button" onclick="memoryClear()">MC</button>
+                <button class="button memory-button" onclick="memoryPlus()">M+</button>
+                <button class="button memory-button" onclick="memoryMinus()">M-</button>
+                <button class="button operator-button" onclick="deleteSymbol()">DEL</button>
+
+                <button class="button" onclick="appendSymbol('7')">7</button>
+                <button class="button" onclick="appendSymbol('8')">8</button>
+                <button class="button" onclick="appendSymbol('9')">9</button>
+                <button class="button operator-button" onclick="appendSymbol('/')">÷</button>
+                <button class="button operator-button" onclick="appendSymbol('*')">×</button>
+
+                <button class="button" onclick="appendSymbol('4')">4</button>
+                <button class="button" onclick="appendSymbol('5')">5</button>
+                <button class="button" onclick="appendSymbol('6')">6</button>
+                <button class="button operator-button" onclick="appendSymbol('-')">-</button>
+                <button class="button operator-button" onclick="appendSymbol('+')">+</button>
+
+                <button class="button" onclick="appendSymbol('1')">1</button>
+                <button class="button" onclick="appendSymbol('2')">2</button>
+                <button class="button" onclick="appendSymbol('3')">3</button>
+                <button class="button operator-button" onclick="appendSymbol('%')">%</button>
+                <button class="button operator-button" onclick="appendSymbol('^')">x<sup>y</sup></button>
+
+                <button class="button zero" onclick="appendSymbol('0')">0</button>
+                <button class="button operator-button" onclick="appendSymbol('.')">.</button>
+                <button class="button equal-button" id="equal" onclick="calculate()">=</button>
+                <button class="button operator-button" onclick="calculateTrig('pow3')">x<sup>3</sup></button>
+            </div>
+        </div>
+        <button class="external-button" id="externalButton" onclick="toggleFormulaSlide()"></button>
+        <div class="formula-slide" id="formulaSlide">
+            <button class="close-formula-panel" onclick="toggleFormulaSlideAndShowButton()">×</button>
+            <h3>Mathematical Formulas</h3>
+            <ul>
+                <li>Pythagoras Theorem: a² + b² = c² <button class="apply-formula-button" onclick="applyFormula('a² + b² = c²')">Apply</button></li>
+                <li>Arithmetic Mean: (Σx) / n <button class="apply-formula-button" onclick="applyFormula('(Σx) / n')">Apply</button></li>
+                <li>Speed: distance / time <button class="apply-formula-button" onclick="applyFormula('distance / time')">Apply</button></li>
+                <li>Kinetic Energy: 0.5 * m * v² <button class="apply-formula-button" onclick="applyFormula('0.5 * m * v²')">Apply</button></li>
+                <li>Complex Numbers: a + bi <button class="apply-formula-button" onclick="applyFormula('a + bi')">Apply</button></li>
+            </ul>
+            <button class="scroll-button" onclick="scrollFormulas('up')">↑</button>
+            <button class="scroll-button" onclick="scrollFormulas('down')">↓</button>
+        </div>
+    </div>
+    <script>
+        let display = document.getElementById('display');
+        let memory = 0;
+        let formulaSlide = document.getElementById('formulaSlide');
+        let externalButton = document.getElementById('externalButton');
+        let angleMode = 'degrees';
+
+        function appendSymbol(symbol) {
+            if (display.innerText.length >= 20) {
+                return;
+            }
+            if (display.innerText === '0' && symbol !== '.') {
+                display.innerText = symbol;
+            } else {
+                display.innerText += symbol;
+            }
+        }
+
+        function clearDisplay() {
+            display.innerText = '0';
+        }
+
+        function deleteSymbol() {
+            if (display.innerText.length === 1) {
+                display.innerText = '0';
+            } else {
+                display.innerText = display.innerText.slice(0, -1);
+            }
+        }
+
+        function calculate() {
+            try {
+                let result = math.evaluate(display.innerText);
+                if (isNaN(result) || !isFinite(result)) {
+                    display.innerText = 'Error!';
+                } else {
+                    display.innerText = result;
+                }
+            } catch {
+                display.innerText = 'Error!';
+            }
+        }
+
+        function calculateTrig(func) {
+            try {
+                let value = parseFloat(display.innerText);
+                if (angleMode === 'degrees') {
+                    value = value * Math.PI / 180;
+                }
+                let result;
+                switch (func) {
+                    case 'sin':
+                        result = Math.sin(value);
+                        break;
+                    case 'cos':
+                        result = Math.cos(value);
+                        break;
+                    case 'tan':
+                        result = Math.tan(value);
+                        break;
+                    case 'cot':
+                        result = 1 / Math.tan(value);
+                        break;
+                    case 'log':
+                        result = Math.log10(value);
+                        break;
+                    case 'exp':
+                        result = Math.exp(value);
+                        break;
+                    case 'sqrt':
+                        result = Math.sqrt(value);
+                        break;
+                    case 'asin':
+                        if (value >= -1 && value <= 1) {
+                            result = Math.asin(value);
+                            if (angleMode === 'degrees') {
+                                result = result * 180 / Math.PI;
+                            }
+                        } else {
+                            throw new Error('Invalid input');
+                        }
+                        break;
+                    case 'acos':
+                        if (value >= -1 && value <= 1) {
+                            result = Math.acos(value);
+                            if (angleMode === 'degrees') {
+                                result = result * 180 / Math.PI;
+                            }
+                        } else {
+                            throw new Error('Invalid input');
+                        }
+                        break;
+                    case 'atan':
+                        result = Math.atan(value);
+                        if (angleMode === 'degrees') {
+                            result = result * 180 / Math.PI;
+                        }
+                        break;
+                    case 'pow2':
+                        result = Math.pow(value, 2);
+                        break;
+                    case 'pow3':
+                        result = Math.pow(value, 3);
+                        break;
+                    default:
+                        throw new Error('Invalid function');
+                }
+                if (isNaN(result) || !isFinite(result)) {
+                    display.innerText = 'Error!';
+                } else {
+                    display.innerText = result;
+                }
+            } catch {
+                display.innerText = 'Error!';
+            }
+        }
+
+        function memoryRecall() {
+            display.innerText = memory;
+        }
+
+        function memoryClear() {
+            memory = 0;
+        }
+
+        function memoryPlus() {
+            memory += parseFloat(display.innerText);
+        }
+
+        function memoryMinus() {
+            memory -= parseFloat(display.innerText);
+        }
+
+        function toggleVisibility(element, isVisible) {
+            if (isVisible) {
+                element.classList.add('active');
+                element.classList.remove('hidden');
+            } else {
+                element.classList.remove('active');
+                element.classList.add('hidden');
+            }
+        }
+
+        function toggleFormulaSlide() {
+            toggleVisibility(formulaSlide, true);
+            toggleVisibility(externalButton, false);
+        }
+
+        function toggleFormulaSlideAndShowButton() {
+            toggleVisibility(formulaSlide, false);
+            toggleVisibility(externalButton, true);
+        }
+
+        function applyFormula(formula) {
+            let expression = "";
+            switch (formula) {
+                case 'a² + b² = c²':
+                    let a = prompt("Enter value for a:");
+                    let b = prompt("Enter value for b:");
+                    if (a !== null && b !== null && !isNaN(a) && !isNaN(b)) {
+                        expression = `Math.pow(${a}, 2) + Math.pow(${b}, 2)`;
+                    } else {
+                        alert("Invalid input.");
+                        return;
+                    }
+                    break;
+                case '(Σx) / n':
+                    let sum = prompt("Enter value for Σx (sum):");
+                    let n = prompt("Enter value for n (number of elements):");
+                    if (sum !== null && n !== null && !isNaN(sum) && !isNaN(n)) {
+                        expression = `${sum} / ${n}`;
+                    } else {
+                        alert("Invalid input.");
+                        return;
+                    }
+                    break;
+                case 'distance / time':
+                    let distance = prompt("Enter value for distance:");
+                    let time = prompt("Enter value for time:");
+                    if (distance !== null && time !== null && !isNaN(distance) && !isNaN(time)) {
+                        expression = `${distance} / ${time}`;
+                    } else {
+                        alert("Invalid input.");
+                        return;
+                    }
+                    break;
+                case '0.5 * m * v²':
+                    let mass = prompt("Enter value for mass (m):");
+                    let velocity = prompt("Enter value for velocity (v):");
+                    if (mass !== null && velocity !== null && !isNaN(mass) && !isNaN(velocity)) {
+                        expression = `0.5 * ${mass} * Math.pow(${velocity}, 2)`;
+                    } else {
+                        alert("Invalid input.");
+                        return;
+                    }
+                    break;
+                case 'a + bi':
+                    let realPart = prompt("Enter real part (a):");
+                    let imaginaryPart = prompt("Enter imaginary part (b):");
+                    if (realPart !== null && imaginaryPart !== null && !isNaN(realPart) && !isNaN(imaginaryPart)) {
+                        expression = `complex(${realPart}, ${imaginaryPart})`;
+                    } else {
+                        alert("Invalid input.");
+                        return;
+                    }
+                    break;
+                default:
+                    alert("Unsupported formula.");
+                    return;
+            }
+            try {
+                let result = math.evaluate(expression);
+                if (typeof result === 'object' && result.im !== undefined) {
+                    display.innerText = `${result.re} + ${result.im}i`;
+                } else if (isNaN(result) || !isFinite(result)) {
+                    display.innerText = 'Error!';
+                } else {
+                    display.innerText = result;
+                }
+            } catch {
+                display.innerText = 'Error!';
+            }
+        }
+
+        function scrollFormulas(direction) {
+            if (direction === 'up') {
+                document.querySelector('.formula-slide ul li:first-child').scrollIntoView({ behavior: 'smooth' });
+            } else if (direction === 'down') {
+                document.querySelector('.formula-slide ul li:last-child').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
+</body>
+</html>
